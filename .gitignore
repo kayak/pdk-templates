@@ -1,8 +1,6 @@
 .*.sw[op]
 *~
 .metadata
-.yardoc
-.yardwarns
 *.iml
 /.bundle/
 /.idea/

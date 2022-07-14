@@ -18,7 +18,7 @@ PDK builds the configuration of the module by reading a set of default configura
 Templates like this one can be used in conjunction with the PDK. As default the PDK itself uses the templates within this repository to render files for use within a module. Templates can be passed to the PDK as a flag for several of the commands.
 
 ```bash
-pdk convert --template-url https://github.com/puppetlabs/pdk-templates
+pdk convert --template-url https://github.com/kayak/pdk-templates
 ```
 
 Please note that the template only needs to be passed in once if you wish to change it, every command run on the PDK will use the last specified template.
@@ -37,19 +37,6 @@ The following is a description and explanation of each of the keys within config
 | disable\_legacy\_facts | Set to `true` to configure PDK to prevent the use of [legacy Facter facts][legacy_facts_doc]. Currently this will install and enable the [legacy\_facts][legacy_facts_pl_plugin] plugin for puppet-lint for use during `pdk validate`. |
 | honeycomb | While enabled by default, honeycomb's use can be turned off: `enabled: false` |
 
-### .editorconfig
-
-> EditorConfig helps maintain consistent coding styles for multiple developers working on the same project across various editors and IDEs.
-
-Please see the [EditorConfig site](https://editorconfig.org) for details on how to install it as a plugin (or if your text editor or IDE includes support natively) and how to configure it.
-
-To enable adding a `.editorconfig`:
-
-```yaml
-.editorconfig:
-  unmanaged: false
-```
-
 ### .gitattributes
 
 >A .gitattributes file in your repo allows you to ensure consistent git settings.
@@ -67,60 +54,6 @@ To enable adding a `.editorconfig`:
 | required          | The default list of files or paths for git to ignore or untrack that are commonly specified in a module project.
 | paths             | Defines any additional files or paths for git to ignore or untrack. (see the [gitignore](https://git-scm.com/docs/gitignore) documentation).
 
-### .gitlab-ci.yml
-
->[Gitlab CI](https://about.gitlab.com/features/gitlab-ci-cd/) is a continuous integration platform that is free for all open source projects hosted on Github and Gitlab.com, it also has a self-hosted option that is free as well. We can trigger automated pipelines with ever change to our code base in the main branch, other branches, tags, or additional triggers.
-Gitlab CI uses a .gitlab-ci.yml file in the root of your repository tell Gitlab CI what jobs to run when in the pipeline.
-
- Key            | Description   |
-| :------------- |:--------------|
-| override       |Defines whether your local `.sync.yml` will ignore the default values in pdk-templates. Defaults to `false`|
-| defaults/custom | The `defaults` and `custom` keys are special keys used to denote when configuration is coming from `config_defaults.yml` or `.sync.yml`. While it is possible for users to extend the defaults provided by PDK, it's suggested that the user should only use the `custom` key to separate their overrides/extended configuration from the PDK provided defaults. |
-| custom_stages  |Defines a custom job stage for when the CI/CD jobs will be executed in the pipeline. By default `syntax` and `unit` are defined unless `override: true`.|
-| beaker         |Defines if you want the default, Docker-in-Docker acceptance job added. Can be set to `true` to enable the default `acceptance` job, or you can specify the `variables` and `tags` subkeys. These subkeys function the same as the `global_variables` option and the `tags` subkey found in the `ruby_versions` option.|
-| global_variables |Allows you to set any global environment variables for the gitlab-ci pipeline. Currently includes setting the Puppet gem version.|
-| cache          | If this setting exists, it expects a single sub-key called `paths`. `paths` is an array of paths that will be cached for each subsequent job. Defaults to `['vendor/bundle']`|
-| tags           | If this setting exists, it expects an array of tags that will be added to each job. Not set by default.|
-| bundler\_args   |Define any arguments you want to pass through to bundler. The default is `--without system_tests --path vendor/bundle --jobs $(nproc)` which avoids installing unnecessary gems while installing them to the `vendor/bundler.|
-| ruby_versions  |Define a list of ruby_versions to test against. Each version can have a series of sub-keys that are options. `checks` is the rake command(s) to run during the job. `puppet_version` sets the PUPPET_GEM_VERSION environment variable. `allow_failure` is an array of `checks` where you want to allow failures. `tags` is an array of Gitlab CI Runner tags. |
-| ruby_versions\\{job}\\**except/only**|Basic `except`/`only` is an hash of `checks` with array of references of conditions for the `checks`:<br><br><pre>ruby_versions:<br>&nbsp;&nbsp;2.4.9:<br>&nbsp;&nbsp;&nbsp;&nbsp;except:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unit:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- tags<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- main</pre><br><br>Advanced `except`/`only` is an hash of `checks` with hash using 4 keywords `'variables', 'refs', 'changes', 'kubernetes'` each with it's own array of references or conditions for the `checks`:<br><br><pre>ruby_versions:<br>&nbsp;&nbsp;2.4.9:<br>&nbsp;&nbsp;&nbsp;&nbsp;except:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unit:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;refs:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- tags<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- main<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;variables:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- $CI_COMMIT_MESSAGE =~ /\[skip[ _-]tests?\]/i</pre> https://docs.gitlab.com/ce/ci/yaml/README.html#onlyexcept-advanced |
-| custom_jobs    |Define custom Gitlab CI jobs that will be executed. It is recommended that you use this option if you need customized Gitlab CI jobs. Please see the [.gitlab-ci.yml](https://docs.gitlab.com/ce/ci/yaml/README.html) docs for specifics.|
-| rubygems_mirror | Use a custom rubygems mirror url |
-| image          |Define the Docker image to use, when using the Docker runner. Please see the [Using Docker images](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html) docs for specifics.|
-| custom_before_steps |Allows you to pass additional steps to the GitLab CI before_script. Please see the [.gitlab-ci.yml](https://docs.gitlab.com/ce/ci/yaml/#before_script-and-after_script) docs for specifics. If given as an array, the steps are executed _before_ the default steps of the before_script. If you want to have more control over the execution order of the steps, you can define a hash with a `before` and/or `after` key holding an array of steps to be executed before and after the default_script respectively.|
-| default_before_script  |If false, removes the default `before_script` section. Useful if you need a customised Bundler install, or to remove Bundler entirely. If the key is unset the default behaviour is to add `before_script`.|
-|use_litmus| By default it is disabled. Set to `true` to configure travis to use Litmus testing tool for acceptance testing jobs with default values.|
-|litmus|Allows you to update default config values. Its sub keys are `provision_list`, `puppet_collection`, `ruby_version`, `install_wget` which are detailed below.|
-|litmus\\**puppet_collection**|Allows you to specify the puppet version under test. Default test are ran on _puppet6_.|
-|litmus\\**provision_list**|Allows you to specify the platforms list under test. Default test are ran on platformes defined in provision.yaml file under _travis_deb_ and _travis_el_|
-|litmus\\**ruby_version**|Allows you to specify the ruby version under test. Default it is set to _2.5.7_|
-|litmus\\**install_wget**|Allows you to enable automatic installation of wget on the platform under test. We need this when installing agent on travis_deb platforms. Default it is disabled. |
-|litmus\\**complex\\collection**|Allows you to specify multiple collections of `puppet_collection` and `provision_list`, allowing you to set certain OS to only run on certain Puppet versions. |
-
-### Gitpod configuration
-If you are using Gitpod you will need to opt-in and enable gitpod support for pdk-templates.  To do this simple set the following configurations.
-
-```yaml
-.gitpod.Dockerfile:
-  unmanaged: false
-.gitpod.yml:
-  unmanaged: false
-```
-
-### Github Workflows
-
-These workflows are depending on puppet-internal resources and are currently not suited for public consumption. Feel free to take them as inspiration how to run some tests on Github Actions. Please let us know at <ia_content@puppet.com> what you come up with!
-
-### .github/workflows/auto_release.yml
-
-The auto release workflows uses the PDK experimental command `pdk release prep` to prepare a module release PR. By default the workflow can be triggered manually when a release preparation PR needs to be created, however it allows setting a cron based trigger that can run automatically.
-To set up the automated release cron you can add a configuration to your .sync.yml file that matches the following example:
-```yaml
-release_schedule:
-   cron: '0 3 * * 6'
-```
-In this example the automated release prep workflow is triggered every Saturday at 3 am.
-
 ### .pdkignore
 
 >A .pdkignore file in your repo allows you to specify files to ignore when building a module package with `pdk build`.
@@ -129,75 +62,6 @@ In this example the automated release prep workflow is triggered every Saturday 
 | :-----------------|:--------------|
 | required          | The default list of files or paths for PDK to ignore when building a module package.
 | paths             | Defines additional files or paths for PDK to ignore when building a module package.
-
-### .travis.yml
-
->[Travis CI](https://travis-ci.org/) is a hosted continuous integration platform that is free for all open source projects hosted on Github.
-We can trigger automated builds with every change to our code base in the main branch, other branches or even a pull request.
-Travis uses a .travis.yml file in the root of your repository to learn about your project and how you want your builds to be executed.
-
-| Key            | Description   |
-| :------------- |:--------------|
-| os | Set to an array of operating systems to test. See the [TravisCI documentation](https://docs.travis-ci.com/user/multi-os/) for more details. |
-| dist | If specified, it will set the dist attribute. See the [TravisCI documentation](https://docs.travis-ci.com/user/reference/overview/#virtualisation-environment-vs-operating-system) for more details. |
-| simplecov      |Set to `true` to enable collecting ruby code coverage.|
-| ruby\_versions  |Define the ruby versions on which you want your builds to be executed.|
-| bundler\_args   |Define any arguments you want to pass through to bundler. The default is `--without system_tests` which avoids installing unnecessary gems.|
-| env            |Allows you to add new travis job matrix entries based on the included environment variables, one per `env` entry; for example, for adding jobs with specific `PUPPET_GEM_VERSION` and/or `CHECK` values.  See the [Travis Environment Variables](https://docs.travis-ci.com/user/environment-variables) documentation for details.|
-| global\_env     |Allows you to set global environment variables which will be defined for all travis jobs; for example, `PARALLEL_TEST_PROCESSORS` or `TIMEOUT`.  See the [Travis Global Environment Variables](https://docs.travis-ci.com/user/environment-variables/#Global-Variables) documentation for details.|
-|docker\_sets     |Allows you to configure sets of docker to run your tests on. For example, if I wanted to run on a docker instance of Ubuntu I would add  `set:docker/ubuntu-14.04` to my docker\_sets attribute.  The docker_sets is a hash that supports the 'set', 'testmode', and 'collection' keys. |
-|docker\_sets['set']| This should reference the docker nodeset that you wish to run. |
-|docker\_sets['testmode']| This configures the `BEAKER_TESTMODE` to use when testing the docker instance. The two options are `apply` and `agent` if omitted `apply` is used by default. |
-|docker_sets['collection]| This configures the `BEAKER_PUPPET_COLLECTION` to use when testing the docker instance. The default is `puppet6`.
-|docker_defaults |Defines what values are used as default when using the `docker_sets` definition. Includes ruby version, sudo being enabled, the distro, the services, the env variables and the script to execute.|
-|stages          |Allows the specification of order and conditions for travis-ci build stages. See [Specifying Stage Order and Conditions](https://docs.travis-ci.com/user/build-stages/#specifying-stage-order-and-conditions).|
-|before_install_pre  |Add install steps to the start of `before_install`. |
-|before_install_post |Add install steps to the end of `before_install`. |
-|includes        |Ensures that the .travis file includes the following checks by default: Rubocop, Puppet Lint, Metadata Lint.|
-|remove_includes |Allows you to remove includes set in `config_defaults.yml`.|
-|branches        |Allows you to specify the only branches that travis will run builds on. The default branches are `main` and `/^v\d/`. |
-|branches_except |Allows you to specify branches that travis will not build on.|
-|remove_branches |Allows you to remove default branches set in config_defaults.yml.|
-|notifications   |Allows you to specify the notifications configuration in the .travis.yml file.|
-|remove_notifications   |Allows you to remove default branches set in config_defaults.yml.|
-|deploy_to_forge|Allows you to change the automatic deployment of modules to the forge. Sub keys are `enabled` and `tag_regex` which are detailed below|
-|deploy_to_forge\\**enabled**|Allows you to enable or disable automatic forge deployments. Default is true|
-|deploy_to_forge\\**tag_regex**|Allows you to use a regular expression to define which tags will trigger a deployment.  The default is `^v\d`|
-|before_deploy|An array which can allow a user to specify the commands to run before kicking off a deployment. See [https://docs.travis-ci.com/user/deployment/releases/#setting-the-tag-at-deployment-time].|
-|use_litmus| By default it is disabled. Set to `true` to configure travis to use Litmus testing tool for acceptance testing jobs with default values.|
-|litmus|Allows you to update default config values. Its sub keys are `provision_list`, `puppet_collection`, `rvm`, `install_wget` which are detailed below.|
-|litmus\\**puppet_collection**|Allows you to specify the puppet version under test. Default test are ran on _puppet 5_ and _puppet 6_.|
-|litmus\\**provision_list**|Allows you to specify the platforms list under test. Default test are ran on platformes defined in provision.yaml file under _travis_deb_ and _travis_el_|
-|litmus\\**rvm**|Allows you to specify the ruby version under test. Default it is set to _2.5.7_|
-|litmus\\**install_wget**|Allows you to enable automatic installation of wget on the platform under test. We need this when installing agent on travis_deb platforms. Default it is disabled. |
-|litmus\\**complex\\collection**|Allows you to specify multiple collections of `puppet_collection` and `provision_list`, allowing you to set certain OS to only run on certain Puppet versions. |
-|user|This string needs to be set to the Puppet Forge user name. To enable deployment the secure key also needs to be set.|
-|secure|This string needs to be set to the encrypted password to enable deployment. See [https://docs.travis-ci.com/user/encryption-keys/#usage](https://docs.travis-ci.com/user/encryption-keys/#usage) for instructions on how to encrypt your password.|
-
-### .yardopts
-
->[YARD](https://yardoc.org/) is a documentation generation tool for the Ruby programming language. It enables the user to generate consistent, usable documentation that can be exported to a number of formats very easily, and also supports extending for custom Ruby constructs such as custom class level definitions.
-
-| Key            | Description   |
-| :------------- |:--------------|
-| markup         |Specifies the markup formatting of your documentation. Default is `markdown`.|
-| optional       |Define any additional arguments you want to pass through to the `yardoc` command.|
-
-### appveyor.yml
-
->[AppVeyor](https://www.appveyor.com/) is a hosted, distributed continuous integration service used to build and test projects hosted on GitHub by spinning up a Microsoft Windows virtual machine. AppVeyor is configured by adding a file named appveyor.yml, which is a YAML format text file, to the root directory of the code repository.
-
-| Key            | Description   |
-| :------------- |:--------------|
-|appveyor\_bundle\_install|Defines the bundle install command for the appveyor execution run. In our case we use bundle install `--without system_tests` as default, therefore avoiding redundant gem installation.|
-|install_pre  |Add install steps to the start of `install`. |
-|install_post |Add install steps to the end of `install`. |
-|environment|Defines any environment variables wanted for the job run. In our case we default to the latest Puppet 4 gem version.|
-|matrix|This defines the matrix of jobs to be executed at runtime. Each defines environment variables for that specific job run. In our defaults we have a Ruby version specfied, followed by the check that will be run for that job.|
-|simplecov|Set to `true` to enable collecting ruby code coverage.|
-|test\_script|This defines the test script that will be executed. For our purposes the default is set to `bundle exec rake %CHECK%`. As appveyor iterates through the test matrix as we defined above, it resolves the variable CHECK and runs the resulting command. For example, our last test script would be executed as `bundle exec rake spec`, which would run the spec tests of the module.|
-|use_litmus|Configures Appveyor to be able to use Litmus for acceptance testing jobs|
-|remove_includes |Allows you to remove includes set in `config_defaults.yml`.|
 
 ### Rakefile
 
